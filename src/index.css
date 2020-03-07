@@ -11,3 +11,22 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+body {
+	background-color: #272B30;
+}
+
+.card {
+	margin: 2% auto;
+	width: 80%;
+}
+
+.card-header {
+	text-align: center;
+	font-weight: bold;
+	font-size: 1.2em;
+}
+
+.card-footer {
+	text-align: right;
+}
