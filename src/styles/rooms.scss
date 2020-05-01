@@ -1,0 +1,16 @@
+.table {
+	text-align: center;
+}
+
+.sensor-card {
+	width: 300px;
+}
+
+.card-footer {
+	border: 0 !important;
+	background-color: white !important;
+}
+
+.card-footer > a:nth-child(1) {
+	float: left !important;
+}
