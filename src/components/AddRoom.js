@@ -118,7 +118,7 @@ export default class AddRoom extends Component {
 		return (
 			<div>
 				<div style = {{ "display": this.state.show ? "block" : "none" }}>
-					<CreateNotification children = {{show: this.state.show, message: "Room saved succesfully."}}/>
+					<CreateNotification children = {{show: this.state.show, message: "Room saved succesfully.", type: "success"}}/>
 				</div>
 
 				<Card>
