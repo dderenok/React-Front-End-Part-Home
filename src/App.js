@@ -7,6 +7,7 @@ import HomeBlock from './components/HomeBlock';
 import Rooms from './components/Rooms';
 import Footer from './components/Footer';
 import AddRoom from './components/AddRoom';
+import Sensors from './components/Sensors';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/" exact component = { HomeBlock } />
         <Route path="/add-room" exact component = { AddRoom } />
         <Route path="/list-room" exact component = { Rooms } />
+        <Route path="/sensors" exact component = { Sensors } />
       </Switch>
       <Footer />
     </Router>
