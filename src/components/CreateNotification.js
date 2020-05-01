@@ -9,9 +9,9 @@ export default class CreateNotification extends Component {
 	render() {
 		return (
 			<div className = {this.props.children.show ? "toast-block": "" }>
-				<Toast className = {this.props.children.show ? "border border-success bg-success text-white toast-block-content": "" } show = { this.props.children.show }>
+				<Toast className = {this.props.children.show ? `border text-white ${this.props.children.type === "success" ? "border-success bg-success" : "border-danger bg-danger"} toast-block-content`: "" } show = { this.props.children.show }>
 					<div>
-						<Toast.Header className = { "bg-success text-white" } closeButton = { false }>
+						<Toast.Header className = { `text-white ${this.props.children.type === "success" ? "bg-success" : "bg-danger"}` } closeButton = { false }>
 							<FontAwesomeIcon icon={ faCheckCircle } /> 
 							<strong className = "mr-auto">Success</strong>
 						</Toast.Header>
