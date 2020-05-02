@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { Card, Table, ButtonGroup, Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faList, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
-import CreateNotification from './CreateNotification.js'; 
+import OperationNotification from './OperationNotification.js'; 
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 import '../styles/rooms.scss';
 
@@ -87,7 +88,7 @@ export default class Rooms extends Component {
 		return (
 			<div>
 				<div style = {{ "display": this.state.show ? "block" : "none" }}>
-					<CreateNotification children = {{show: this.state.show, message: "Room deleted succesfully.", type: "danger"}}/>
+					<OperationNotification show = { this.state.show } message = { "Room deleted succesfully." } type = { "danger" }/>
 				</div>
 				<Card>
 					<Card.Header><FontAwesomeIcon icon={ faList } />
@@ -149,10 +150,10 @@ export default class Rooms extends Component {
 						    				})}
 						    			</td>
 						    			<td>
-						    				<ButtonGroup>
-						    					<Button size="sm" variant="outline-primary">
+						    				<ButtonGroup> 
+						    					<Link to = { "edit-room/"+room.guid } className="btn btn-sm btn-outline-primary">
 						    						<FontAwesomeIcon icon={ faEdit } />
-					    						</Button>
+						    					</Link>{' '}
 					    						<Button size="sm" variant="outline-danger" onClick={this.deleteRoom.bind(this, room.guid)}>
 					    							<FontAwesomeIcon icon={ faTrash } />
 					    						</Button>
