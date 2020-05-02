@@ -3,8 +3,8 @@ import React, { Component } from 'react';
 import { Card, Button, Form, Col } from 'react-bootstrap';
 import InputGroup from 'react-bootstrap/InputGroup';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlusSquare } from '@fortawesome/free-solid-svg-icons';
-import CreateNotification from './CreateNotification.js'; 
+import { faPlusSquare, faList } from '@fortawesome/free-solid-svg-icons';
+import OperationNotification from './OperationNotification.js'; 
 
 import axios from 'axios';
 
@@ -101,6 +101,7 @@ export default class AddRoom extends Component {
 	}
 
 	temperatureSelectChange = (event) => {
+		console.log("TEMPERATURE EVENT")
 		this.setState({
 			temperatureGuid: event.target.value
 		});
@@ -113,12 +114,16 @@ export default class AddRoom extends Component {
 		})
 	}
 
+	roomList = () => {
+		return this.props.history.push("/list-room");
+	}
+
 	render() {
 		const { name, temperatureSensors, temperatureGuid, lightGuid, lightSensors, lightSensorGuids } = this.state;
 		return (
 			<div>
 				<div style = {{ "display": this.state.show ? "block" : "none" }}>
-					<CreateNotification children = {{show: this.state.show, message: "Room saved succesfully.", type: "success"}}/>
+					<OperationNotification show = {this.state.show} message = {"Room saved succesfully."} type = {"success"}/>
 				</div>
 
 				<Card>
@@ -179,6 +184,9 @@ export default class AddRoom extends Component {
 						</Card.Body>
 
 						<Card.Footer>
+							<Button size="sm" variant="info" type="button" onClick = {this.roomList.bind()} >
+						    	<FontAwesomeIcon icon={ faList } /> Room list
+						  	</Button>
 							<Button size="sm" variant="success" type="button" onClick = {this.submitForm}>
 						    	Submit
 						  	</Button>

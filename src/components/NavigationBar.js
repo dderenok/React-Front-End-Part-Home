@@ -15,9 +15,9 @@ export default class NavigationBar extends Component {
 					<span className="logo-name">Smart Home</span>
 				</Link>
 				<Nav className="mr-auto">
-		      <Link to={"list-room"} className="nav-link">Rooms</Link>
-		      <Link to={"add-room"} className="nav-link">Add Room</Link>
-		      <Link to={"sensors"} className="nav-link">Sensors</Link>
+			    <Link to={"list-room"} className="nav-link">Rooms</Link>
+			    <Link to={"add-room"} className="nav-link">Add Room</Link>
+			    <Link to={"sensors"} className="nav-link">Sensors</Link>
   			</Nav>
 			</Navbar>
 		)
