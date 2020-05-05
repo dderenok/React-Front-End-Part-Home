@@ -36,7 +36,7 @@ export default class AddRoom extends Component {
 	}
 
 	getTemperatureSensors = async => {
-		axios.get("http://localhost:8082/temperature")
+		axios.get("http://localhost:8082/temperature/attach-available")
 			.then(({ data }) => {
 				this.setState({
 					temperatureSensors: data,
