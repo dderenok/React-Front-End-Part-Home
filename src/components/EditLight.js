@@ -19,31 +19,63 @@ export default class EditLight extends Component {
 	}
 
 	initialState = {
-		name:''
+		name:'',
+		formErrors: {name: ''},
+		nameValid: false,
+		roomGuid: '',
+		availableRoom: [],
+		alreadyAttached: false
 	}
 	
-	componentDidMount() {
+	async componentDidMount() {
 		console.log()
-		axios.get("http://localhost:8083/light/" + this.props.match.params.guid)
+		await axios.get("http://localhost:8083/light/" + this.props.match.params.guid)
 			.then(response => {
 				console.log(response.data)
 				if (response.data != null) {
 					this.setState({
-						name: response.data.name
+						name: response.data.name,
+						roomGuid: response.data.roomGuid
 					})
+					if (response.data.roomGuid !== null) {
+						this.setState({
+							alreadyAttached: true
+						})
+					}
+					this.getRoomInfo()
 				}
 			}).catch((error) => console.log(error))
+
+		
 	}
 
-	nameChangeHandler() {
-		let lightInfo = {
-			name: this.state.name
-		}
-		console.log(this.props.match.params.guid)
-		console.log(this.state.name)
-		axios.put("http://localhost:8083/light/" + this.props.match.params.guid, lightInfo)
+	getRoomInfo() {
+	 	axios.get("http://localhost:8081/room/available-rooms/light")
+			.then(({data}) => {
+				this.setState({
+					availableRoom: data
+				})
+			})
+	}
+
+	nameChangeHandler(event) {
+		if (event.target.value.length === 0) {
+			this.setState({
+				formErrors: {
+					name: "Name value cannot be empty."
+				}
+			})
+		} else {
+			this.setState({
+				formErrors: {
+					name: ''
+				}
+			})
+			let lightInfo = {
+				name: this.state.name
+			}
+			axios.put("http://localhost:8083/light/" + this.props.match.params.guid, lightInfo)
 				.then(response => {
-					console.log(response)
 					if (response.data != null) {
 						this.setState({
 							"show": true,
@@ -55,6 +87,33 @@ export default class EditLight extends Component {
 						this.setState({"show": false})
 					}
 				})
+		}
+		
+	}
+
+	lightRoomHandler(event) {
+		if (this.state.roomGuid !== null) {
+			let lightInfo = {
+				roomGuid: this.state.roomGuid
+			}
+
+			axios.put("http://localhost:8083/light/" + this.props.match.params.guid, lightInfo)
+				.then(response => {
+					console.log(response)
+					if (response.data != null) {
+						this.setState({
+							"show": true,
+							"showMessage": "Light was attached to room succesfully.",
+							alreadyAttached: true
+						})
+						setTimeout(() => this.setState({"show": false}), 3000)
+						
+					} else {
+						this.setState({"show": false})
+					}
+				})
+		}
+		
 	}
 
 	nameChange(event) {
@@ -63,32 +122,73 @@ export default class EditLight extends Component {
 		});
 	}
 
+	roomSelectChange = (event) => {
+		if (event.target.value !== "Choose necessary room...") {
+			this.setState({
+				roomGuid: event.target.value
+			});
+		} else {
+			this.setState({
+				roomGuid: ''
+			});
+		}
+	}
+
 	backToSensorList = () => {
 		return this.props.history.push("/sensors");
 	}
 
 	render() {
+		const { formErrors, roomGuid, availableRoom, alreadyAttached } = this.state
 		return (
 			<div>
 				<div style = {{ "display": this.state.show ? "block" : "none" }}>
 					<OperationNotification show = { this.state.show } message = { this.state.showMessage } type = { "success" }/>
 				</div>
 				<Card>
-					<Card.Header><FontAwesomeIcon icon={ faPlusSquare } /> Add Light sensor</Card.Header>
+					<Card.Header>Edit Light sensor</Card.Header>
 					<Form onSubmit={this.submitForm} id="room-form">
 						<Card.Body>
-						 	<Form.Row>
-						 		<Form.Group as={ Col } controlId="formControlName">
-							    <Form.Label>Name of Light sensor</Form.Label>
-							    <Form.Control required
-							    	type="text" name="name"
-							    	value={this.state.name}
-							    	onChange={this.nameChange}
-							    	className={"bg-light text-black"}
-							    	placeholder="Enter Name for Light sensor"
-							    	onBlur = {this.nameChangeHandler.bind(this)} />
-							  </Form.Group>
-						 	</Form.Row>
+					 		<Form.Group as={ Col } controlId="formControlName">
+						    <Form.Label>Name of Light sensor</Form.Label>
+						    <Form.Control required
+						    	type="text" name="name"
+						    	value={this.state.name}
+						    	onChange={this.nameChange}
+						    	className={"bg-light text-black"}
+						    	placeholder="Enter Name for Light sensor"
+						    	isInvalid={!!formErrors.name}
+						    	onBlur = {this.nameChangeHandler.bind(this)} />
+
+						    <Form.Control.Feedback type="invalid">
+				               {formErrors.name}
+				            </Form.Control.Feedback>
+						  </Form.Group>
+
+						  { alreadyAttached === false ? 
+						  	<Form.Group as={Col} controlId="formGridState">
+						      <Form.Label>Attach to room</Form.Label>
+
+						      <Form.Control 
+						      	as="select" 
+						      	custom={roomGuid}
+						      	onChange={(e) => this.roomSelectChange(e)}
+						      	value={roomGuid}
+						      	onBlur = {this.lightRoomHandler.bind(this)}
+						      	>
+						      	<option>Choose necessary room...</option>
+						      	{ availableRoom.map((room) => {
+						      		return(
+						      			<option key={room.guid} value={room.guid}>
+						      				{room.name}
+						      			</option>
+						      		)
+						      	})}
+						      </Form.Control>
+						    </Form.Group>
+						    :
+						    <p>This sensor already attached to room.</p>
+						}
 						</Card.Body>
 
 						<Card.Footer>

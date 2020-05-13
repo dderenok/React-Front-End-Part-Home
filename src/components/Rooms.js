@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Card, Table, ButtonGroup, Button } from 'react-bootstrap';
+import { Card, Table, ButtonGroup, Button, Container, Row, Col } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faList, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import DataTable from 'react-data-table-component';
 import OperationNotification from './OperationNotification.js'; 
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -17,10 +18,69 @@ export default class Rooms extends Component {
 
 	initialState = {
 		rooms: [],
+		showMessage: '',
+		typeMessage: '',
 		temperatureSensorGuids: "",
 		lightSensorGuids: "",
 		temperatureSensors: [],
-		lightSensors: []
+		lightSensors: [],
+		amountOfTemperatureSensors: 0,
+		amountOfLightSensors: 0,
+		isLoadedRoomInfo: true,
+		roomColumns: [
+	      {
+	        name: 'Name',
+	        selector: 'name',
+	        sortable: 'asc',
+	        cell: (row) => 
+	        	<div>
+	        		<Link to = { "room-info/"+row.guid }>
+						{row.name}
+					</Link>
+	        	</div>,
+	        center: true,
+	        width: '20%',
+	        selectableRows: true
+	      },
+	      {
+	      	name: 'Temperature sensor is present',
+	      	selector: 'amount of temperature sensor',
+	      	cell: (row) =>
+	      		<div>
+	      			{row.sensors.filter(sensor => sensor.type === "TEMPERATURE").length === 1 ? "Yes" : "No"}
+	      		</div>,
+	      	center: true,
+	      	selectableRows: true
+	      },
+	      {
+	      	name: 'Amount of Light sensor',
+	      	selector: 'amount of light sensor',
+	      	cell: (row) =>
+	      		<div>
+	      			{row.sensors.filter(sensor => sensor.type === "LIGHT").length}
+	      		</div>,
+	      	center: true,
+	      	selectableRows: true
+	      },
+	      {
+	      	cell: (row) =>
+	      		<div>
+	      			<Link to = { "edit-room/"+row.guid } className="btn btn-sm btn-outline-primary">
+						Edit
+					</Link>
+		      		<Button size="sm" variant = "outline-danger" type="button" onClick={(event) => this.deleteRoom(row.guid)}>Delete</Button>
+		      	</div>
+	      	,
+    		ignoreRowClick: true,
+    		allowOverflow: true,
+    		button: true,
+    		name: 'Actions',
+    		center: true,
+    		width: '10%',
+    		selectableRows: true
+	      }
+        ],
+        roomsData: []
 	};
 
 	parseSensorGuids() {
@@ -28,8 +88,10 @@ export default class Rooms extends Component {
 		    for (let j = 0; j < this.state.rooms[i].sensors.length ; j++) {
 		        if (this.state.rooms[i].sensors[j].type === "TEMPERATURE" ) {
 		            this.state.temperatureSensorGuids += this.state.rooms[i].sensors[j].guid + ","
+		            this.state.amountOfTemperatureSensors += 1
 		        } else if (this.state.rooms[i].sensors[j].type === "LIGHT" ) {
 		            this.state.lightSensorGuids += this.state.rooms[i].sensors[j].guid + ","
+		            this.state.amountOfLightSensors += 1
 		        } 
 		    } 
 		}
@@ -42,42 +104,83 @@ export default class Rooms extends Component {
 					"http://localhost:8081/room/all-rooms"
 				).then(({ data }) => {
 					this.setState({ 
-						rooms: data
+						rooms: data,
+						roomsData: data.map((room, index) => {
+							return {
+								id: index,
+								name: room.name,
+								guid: room.guid,
+								sensors: room.sensors
+							}
+						}).reverse()
 					})
 					this.parseSensorGuids()
 				})
 
-		console.log(this.state.temperatureSensorGuids)
-		console.log(this.state.lightSensorGuids)
-
-		await axios.get(
-					"http://localhost:8083/light/list", 
-					{params: {guids: this.state.lightSensorGuids} 
-				}).then(({ data }) => {
-					this.setState({
-						lightSensors: data
-					})
-				});
-
-		await axios.get(
-					"http://localhost:8082/temperature/list", 
-					{params: {guids: this.state.temperatureSensorGuids} 
-				}).then(({ data }) => {
-					this.setState({
-						temperatureSensors: data
-					})
-				});
+		this.setState({
+			roomsData: this.state.roomsData.reverse(),
+			isLoadedRoomInfo: false
+		})
 	};
+
 
 	deleteRoom = (roomGuid) => {
 		axios.delete("http://localhost:8081/room/" + roomGuid)
 			.then(response => {
 				if (response.data != null) {
-					this.setState({"show": true})
+					this.setState({
+						"show": true,
+						"showMessage": 'Roow was deleted succesfully.',
+						"typeMessage": 'danger'
+					})
 					setTimeout(() => this.setState({"show": false}), 3000)
 					this.setState({
-						rooms: this.state.rooms.filter(room => room.guid !== roomGuid)
+						roomsData: this.state.roomsData.filter(room => room.guid !== roomGuid)
 					})
+				} else {
+					this.setState({"show": false})
+				}
+			})
+	};
+
+	deleteTemperatureSensor = (sensor) => {
+		let temperatureDto = {
+			guid: sensor.guid,
+			type: "TEMPERATURE"
+		}
+		axios.put("http://localhost:8081/room/remove-sensors/", [temperatureDto])
+			.then(response => {
+				if (response.data != null) {
+					this.setState({
+						"show": true,
+						"showMessage": 'Sensor was deleted from room succesfully.',
+						"typeMessage": 'danger'
+					})
+					setTimeout(() => this.setState({"show": false}), 3000)
+					console.log(this.state.temperatureSensors)
+					window.location.reload()
+				} else {
+					this.setState({"show": false})
+				}
+			})
+	};
+
+	deleteLightSensor = (sensor) => {
+		let lightDto = {
+			guid: sensor.guid,
+			type: "LIGHT"
+		}
+		axios.put("http://localhost:8081/room/remove-sensors/", [lightDto])
+			.then(response => {
+				if (response.data != null) {
+					this.setState({
+						"show": true,
+						"showMessage": 'Sensor was deleted from room succesfully.',
+						"typeMessage": 'danger'
+					})
+					setTimeout(() => this.setState({"show": false}), 3000)
+					console.log(this.state.temperatureSensors)
+					window.location.reload()
 				} else {
 					this.setState({"show": false})
 				}
@@ -88,85 +191,28 @@ export default class Rooms extends Component {
 		return (
 			<div>
 				<div style = {{ "display": this.state.show ? "block" : "none" }}>
-					<OperationNotification show = { this.state.show } message = { "Room deleted succesfully." } type = { "danger" }/>
+					<OperationNotification show = { this.state.show } message = { this.state.showMessage } type = { this.state.typeMessage }/>
 				</div>
-				<Card>
-					<Card.Header><FontAwesomeIcon icon={ faList } />
-					 	List of rooms
-					</Card.Header>
-					<Card.Body>
-						<Table bordered hover striped variant="light">
-						  <thead>
-						    <tr>
-						      <th>Room Name</th>
-						      <th>Temperature Sensor</th>
-						      <th>Light Sensor</th>
-						      <th>Action</th>
-						    </tr>
-						  </thead>
-						  <tbody>
-						  	{this.state.rooms.length === 0 ?
-						  		<tr align="center">
-						      		<td colSpan="6">No rooms available</td>
-						    	</tr> :
-						    	this.state.rooms.map((room) => (
-						    		<tr key = {room.guid}>
-						    			<td>{room.name}</td>
-						    			<td>
-						    				<Card className="sensor-card">
-						    					<Card.Body>
-					    							{ this.state.temperatureSensors.map(temperatureSensor => {
-
-					    								for (var i = 0; i < room.sensors.length; i++) {
-					    									if (room.sensors[i].guid == temperatureSensor.guid) return <Card.Text key = {temperatureSensor.guid}>
-					    										Temperature of {temperatureSensor.name} sensor is {temperatureSensor.temperatureValue} degrees
-					    									</Card.Text>
-					    								}
-					    							})}
-						    						
-						    						<Card.Footer className="temperature-sensor-footer">
-						    							<a href="#">Delete</a>
-						    							<a href="#">Change</a>
-						    						</Card.Footer>
-						    					</Card.Body>
-						    				</Card>
-						    			</td>
-						    			<td>
-						    				{ this.state.lightSensors.map(lightSensor => {
-						    					for (var i = 0; i < room.sensors.length; i++) {
-			    									if (room.sensors[i].guid == lightSensor.guid)
-									    				return <Card key = {lightSensor.guid} className="sensor-card">
-									    					<Card.Body>
-						    								    <Card.Text>
-						    										Light status of {lightSensor.name} sensor is {} {lightSensor.status.toString()}
-						    									</Card.Text>
-								    							<Button variant="primary">Turn {lightSensor.status === true ? "Off": "On"}</Button>
-									    					</Card.Body>
-									    					<Card.Footer className="temperature-sensor-footer">
-								    							<a href="#">Delete</a>
-								    						</Card.Footer>	
-									    				</Card>
-						    					}
-						    				})}
-						    			</td>
-						    			<td>
-						    				<ButtonGroup> 
-						    					<Link to = { "edit-room/"+room.guid } className="btn btn-sm btn-outline-primary">
-						    						<FontAwesomeIcon icon={ faEdit } />
-						    					</Link>{' '}
-					    						<Button size="sm" variant="outline-danger" onClick={this.deleteRoom.bind(this, room.guid)}>
-					    							<FontAwesomeIcon icon={ faTrash } />
-					    						</Button>
-						    				</ButtonGroup>
-						    			</td>
-						    		</tr>
-						    	))
-						  	}
-						    
-						  </tbody>
-						</Table>
-					</Card.Body>
-				</Card>
+				<Container className = "room-data-table">
+					<Row>
+						<Col >
+							<DataTable
+							    title="Room name"
+							    actions = {
+							    	<Link to = { "add-room" } className="btn btn-sm btn-outline-primary">
+			    						Add new room
+			    					</Link>
+							    }
+							    columns={this.state.roomColumns}
+							    data={this.state.roomsData}
+							    progressPending = {this.state.isLoadedRoomInfo}
+							    pagination = {true}
+							    overflowY = {true}
+							    selectableRows = {true}
+							 />
+						</Col>
+					</Row>
+				</Container>
 			</div>
 			
 		)

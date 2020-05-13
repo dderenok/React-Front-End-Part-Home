@@ -5,6 +5,7 @@ import DataTable from 'react-data-table-component';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import OperationNotification from './OperationNotification.js'; 
+import { Tabs } from 'antd';
 
 import '../styles/sensors.scss';
 
@@ -119,10 +120,6 @@ export default class Sensors extends Component {
 				});
 	};
 
-	handleButtonClick() {
-
-	}
-
 	deleteLightSensor = (row, event) => {
 		axios.delete("http://localhost:8083/light/"+row.guid)
 			.then(response => {
@@ -161,16 +158,17 @@ export default class Sensors extends Component {
 	}
 	
 	render () {
+		const { TabPane } = Tabs;
 		return (
 			<div>
 				<div style = {{ "display": this.state.show ? "block" : "none" }}>
 					<OperationNotification show = { this.state.show } message = { this.state.showMessage } type = { "danger" }/>
 				</div>
-				<Container className = "sensor-list-container">
-					<Row>
-						<Col sm={6} >
+				<div className="table-info">
+					<Tabs defaultActiveKey="1">
+					    <TabPane tab="Temperature sensors" key="1">
 							<DataTable
-							    title="Temperature sensors"
+								noHeader = {true}
 							    actions = {
 							    	<Link to = { "add-temperature" } className="btn btn-sm btn-outline-primary">
 			    						Add new
@@ -181,10 +179,10 @@ export default class Sensors extends Component {
 							    progressPending = {this.state.isLoadedTemperature}
 							    pagination = {true}
 							 />
-						</Col>
-						<Col sm={6}>
-							<DataTable
-							    title="Light sensors"
+					    </TabPane>
+					    <TabPane tab="Light sensors" key="2">
+					    	<DataTable
+					    		noHeader = {true}
 							    actions = {
 							    	<Link to = { "add-light" } className="btn btn-sm btn-outline-primary">
 			    						Add new
@@ -193,10 +191,11 @@ export default class Sensors extends Component {
 							    columns={this.state.lightColumns}
 							    data={this.state.lightData}
 							    progressPending = {this.state.isLoadedLight}
+							    pagination = {true}
 							 />
-						</Col>
-					</Row>
-				</Container>
+					    </TabPane>
+					</Tabs>
+				</div>
 			</div>
 			
 		)

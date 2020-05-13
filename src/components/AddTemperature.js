@@ -6,6 +6,7 @@ import { faPlusSquare, faList } from '@fortawesome/free-solid-svg-icons';
 import OperationNotification from './OperationNotification.js'; 
 
 import axios from 'axios';
+import '../styles/add-temperature.scss';
 
 export default class AddTemperature extends Component {
 
@@ -24,11 +25,15 @@ export default class AddTemperature extends Component {
 		name:'', 
 		temperatureValue:'',
 		roomGuid: '',
-		availableRoom: []
+		availableRoom: [],
+		formErrors: {name: '', temperatureValue: ''},
+		nameValid: false,
+		temperatureValueValid: false,
+		formValid: false
 	}
 
 	async componentDidMount() {
-		await axios.get("http://localhost:8081/room/available-rooms")
+		await axios.get("http://localhost:8081/room/available-rooms/temperature")
 			.then(({data}) => {
 				console.log(data)
 				this.setState({
@@ -38,8 +43,6 @@ export default class AddTemperature extends Component {
 	}
 
 	submitForm(event) {
-		console.log(this.state.roomGuid)
-		console.log(this.state.availableRoom)
 		let temperatureSensor = {
 			name: this.state.name,
 			temperatureValue: this.state.temperatureValue,
@@ -87,22 +90,60 @@ export default class AddTemperature extends Component {
 		}
 	}
 
+	nameChangeHandler(event) {
+		this.setState({
+			name: event.target.value
+		});
+		if (event.target.value.length === 0) {
+			this.setState({
+				formErrors: {
+					name: "Name value cannot be empty."
+				}
+			})
+		} else {
+			this.setState({
+				formErrors: {
+					name: ''
+				}
+			})
+		}
+	}
+
+	temperatureChangeHandler(event) {
+		this.setState({
+			temperatureValue: event.target.value
+		})
+		if (this.state.temperatureValue < 15 || this.state.temperatureValue > 30) {
+			console.log("1")
+			this.setState({
+				formErrors: {
+					temperatureValue: "Temperature value desirable to have in range from 15 to 30 degress."
+				}
+			})
+		} else {
+			this.setState({
+				formErrors: {
+					temperatureValue: ''
+				}
+			})
+		}
+	}
+
 	backToSensorList = () => {
 		return this.props.history.push("/sensors");
 	}
 
 	render() {
-		const { roomGuid, availableRoom } = this.state
+		const { roomGuid, availableRoom, formErrors, formValid } = this.state
 		return (
 			<div>
 				<div style = {{ "display": this.state.show ? "block" : "none" }}>
 					<OperationNotification show = { this.state.show } message = { "Temperature sensor was created succesfully." } type = { "success" }/>
 				</div>
 				<Card>
-					<Card.Header><FontAwesomeIcon icon={ faPlusSquare } />Add Temperature sensor</Card.Header>
-					<Form onSubmit={this.submitForm} id="room-form">
+					<Card.Header>Add Temperature sensor</Card.Header>
+					<Form onSubmit={this.submitForm} id="temperature-form">
 						<Card.Body>
-						 	<Form.Row>
 						 		<Form.Group as={ Col } controlId="formControlName">
 							    <Form.Label>Name of Temperature sensor</Form.Label>
 							    <Form.Control required
@@ -110,7 +151,13 @@ export default class AddTemperature extends Component {
 							    	value={this.state.name}
 							    	onChange={this.nameChange}
 							    	className={"bg-light text-black"}
+							    	onBlur = {this.nameChangeHandler.bind(this)}
+							    	isInvalid={!!formErrors.name}
 							    	placeholder="Enter Name for Temperature sensor" />
+
+							    <Form.Control.Feedback type="invalid">
+					               {formErrors.name}
+					            </Form.Control.Feedback>
 							  </Form.Group>
 
 							  <Form.Group as={ Col } controlId="formControlTemperature">
@@ -120,7 +167,19 @@ export default class AddTemperature extends Component {
 							    	value={this.state.temperatureValue}
 							    	onChange={this.temperatureValueChange}
 							    	className={"bg-light text-black"}
+							    	onBlur = {this.temperatureChangeHandler.bind(this)}
+							    	isInvalid={!!formErrors.temperatureValue}
 							    	placeholder="Enter Default Temerature for sensor" />
+
+							     <Form.Control.Feedback type="invalid">
+					               {formErrors.temperatureValue}
+					            </Form.Control.Feedback>
+					            { formErrors.temperatureValue === '' ? 
+					            	<Form.Text className="text-muted">
+								        For comfort mood use temperature value in range from 15 to 30 degress, please.
+								    </Form.Text>
+								    :<br />
+								}
 							  </Form.Group>
 
 							  <Form.Group as={Col} controlId="formGridState">
@@ -141,17 +200,14 @@ export default class AddTemperature extends Component {
 							      	})}
 							      </Form.Control>
 							    </Form.Group>
-
-						 	</Form.Row>
 						</Card.Body>
-
 						<Card.Footer>
 							<Button size="sm" variant="info" type="button" onClick = {this.backToSensorList.bind()} >
 						    	<FontAwesomeIcon icon={ faList } /> Back to sensor list
 						  	</Button>
-							<Button size="sm" variant="success" type="button" onClick = {this.submitForm}>
+					  		<button className = "btn-sm btn-primary" onClick = {this.submitForm}>
 						    	Create
-						  	</Button>
+						  	</button>
 						</Card.Footer>
 					</Form> 
 				</Card>

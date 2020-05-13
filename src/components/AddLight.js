@@ -19,12 +19,25 @@ export default class AddLight extends Component {
 	}
 
 	initialState = {
-		name:''
+		name:'',
+		roomGuid: '',
+		availableRoom: []
+	}
+
+	async componentDidMount() {
+		await axios.get("http://localhost:8081/room/available-rooms/light")
+			.then(({data}) => {
+				console.log(data)
+				this.setState({
+					availableRoom: data
+				})
+			})
 	}
 
 	async submitForm(event) {
 		let lightSensor = {
-			name: this.state.name
+			name: this.state.name,
+			roomGuid: this.state.roomGuid
 		}
 
 		console.log(lightSensor)
@@ -49,31 +62,64 @@ export default class AddLight extends Component {
 		});
 	}
 
+	roomSelectChange = (event) => {
+		if (event.target.value !== "Choose necessary room...") {
+			this.setState({
+				roomGuid: event.target.value
+			});
+		} else {
+			this.setState({
+				roomGuid: ''
+			});
+		}
+	}
+
 	backToSensorList = () => {
 		return this.props.history.push("/sensors");
 	}
 
 	render() {
+		const { 
+			roomGuid,
+			availableRoom
+		} = this.state;
 		return (
 			<div>
 				<div style = {{ "display": this.state.show ? "block" : "none" }}>
 					<OperationNotification show = { this.state.show } message = { "Light sensor was created succesfully." } type = { "success" }/>
 				</div>
 				<Card>
-					<Card.Header><FontAwesomeIcon icon={ faPlusSquare } /> Add Light sensor</Card.Header>
+					<Card.Header>Add Light sensor</Card.Header>
 					<Form onSubmit={this.submitForm} id="room-form">
 						<Card.Body>
-						 	<Form.Row>
-						 		<Form.Group as={ Col } controlId="formControlName">
-							    <Form.Label>Name of Light sensor</Form.Label>
-							    <Form.Control required
-							    	type="text" name="name"
-							    	value={this.state.name}
-							    	onChange={this.nameChange}
-							    	className={"bg-light text-black"}
-							    	placeholder="Enter Name for Light sensor" />
-							  </Form.Group>
-						 	</Form.Row>
+					 		<Form.Group as={ Col } controlId="formControlName">
+						    <Form.Label>Name of Light sensor</Form.Label>
+						    <Form.Control required
+						    	type="text" name="name"
+						    	value={this.state.name}
+						    	onChange={this.nameChange}
+						    	className={"bg-light text-black"}
+						    	placeholder="Enter Name for Light sensor" />
+						  </Form.Group>
+
+						  <Form.Group as={Col} controlId="formGridState">
+						      <Form.Label>Attach to room</Form.Label>
+
+						      <Form.Control 
+						      	as="select" 
+						      	custom={roomGuid}
+						      	onChange={(e) => this.roomSelectChange(e)}
+						      	value={roomGuid}>
+						      	<option>Choose necessary room...</option>
+						      	{ availableRoom.map((room) => {
+						      		return(
+						      			<option key={room.guid} value={room.guid}>
+						      				{room.name}
+						      			</option>
+						      		)
+						      	})}
+						      </Form.Control>
+						    </Form.Group>
 						</Card.Body>
 
 						<Card.Footer>

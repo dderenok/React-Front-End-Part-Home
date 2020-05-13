@@ -1,13 +1,26 @@
 .toast-block {
 	position: fixed;
-	min-width: 200px;
+	min-width: 350px;
 	bottom: 50px;
 	right: 20px;
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 	z-index: 1;
+	overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
 }
 
 .toast-block-content > div {
-	min-width: 200px;
-	width: 400px;
+	min-width: 300px;
+	width: 500px;
+	overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+}
+
+.notification-text > .toast-body {
+	white-space: normal !important;
+	overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
 }

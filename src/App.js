@@ -13,6 +13,7 @@ import AddTemperature from './components/AddTemperature';
 import AddLight from './components/AddLight';
 import EditLight from './components/EditLight';
 import EditTemperature from './components/EditTemperature';
+import RoomInfo from './components/RoomInfo';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/add-light" exact component = { AddLight } />
         <Route path="/edit-light/:guid" exact component = { EditLight } />
         <Route path="/edit-temperature/:guid" exact component = { EditTemperature } />
+        <Route path="/room-info/:guid" exact component = { RoomInfo } />
       </Switch>
       <Footer />
     </Router>

@@ -6,6 +6,19 @@
 	width: 300px;
 }
 
+.sensor-card {
+	text-align: center;
+	width: 80%;
+}
+
+.sensor-card-text {
+	white-space: normal;
+}
+
+.change-sensor {
+	margin-right: 2%;
+}
+
 .card-footer {
 	border: 0 !important;
 	background-color: white !important;
@@ -13,4 +26,22 @@
 
 .card-footer > a:nth-child(1) {
 	float: left !important;
+}
+
+.room-list-container {
+	align-items: center;
+}
+
+.room-data-table {
+	margin-bottom: 5%;
+	width: 80% !important
+}
+
+.delete-sensor {
+	float: left;
+}
+
+.edit-sensor {
+	float: right;
+	margin-right: 0
 }

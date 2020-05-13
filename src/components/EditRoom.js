@@ -9,7 +9,6 @@ import OperationNotification from './OperationNotification.js';
 import axios from 'axios';
 
 import '../styles/edit-room.scss';
-import CheckBox from './CheckBox.js';
 
 export default class EditRoom extends Component {
 
@@ -22,7 +21,6 @@ export default class EditRoom extends Component {
 		this.nameChange = this.nameChange.bind(this);
 		this.temperatureSelectChange = this.temperatureSelectChange.bind(this);
 		this.lightSelectChange = this.lightSelectChange.bind(this);
-		this.submitForm = this.submitForm.bind(this);
 		this.nameChangeHandler = this.nameChangeHandler.bind(this)
 	}
 
@@ -34,6 +32,7 @@ export default class EditRoom extends Component {
 		roomTemperatureSensor: [],
 		chosenTemperature: {},
 		abilityForAddingTemperatureSensors: false,
+		temperatureLoader: false,
 		lightGuid: '',
 		lightSensors: [],
 		lightSensorGuids: [],
@@ -77,7 +76,18 @@ export default class EditRoom extends Component {
 	}
 
  	async getTemperatureSensors() {
-		await axios.get("http://localhost:8082/temperature")
+ 		if (this.state.roomTemperatureSensor.length > 0) {
+				await axios.get("http://localhost:8082/temperature/"+this.state.roomTemperatureSensor[0].guid)
+					.then(({data}) => {
+						this.setState({
+							chosenTemperature: data,
+							temperatureLoader: true
+						})
+					})
+				} else {
+					this.state.chosenTemperature = {}
+				}
+		await axios.get("http://localhost:8082/temperature/attach-available")
 			.then(({ data }) => {
 				this.setState({
 					temperatureSensors: data,
@@ -88,19 +98,29 @@ export default class EditRoom extends Component {
 						temperatureGuid: data[0].guid
 					})
 				}
-				this.state.chosenTemperature = this.state.temperatureSensors.find(temperatureSensor => temperatureSensor.guid == this.state.roomTemperatureSensor[0].guid)
-				console.log(this.state.chosenTemperature)
+				
 			});
 	}
 
 	async getLightSensors() {
-		await axios.get("http://localhost:8083/light")
+		let lightSensorGuids = this.state.roomLightSensors.map(sensor => sensor.guid)
+		console.log(lightSensorGuids)
+		var params = new URLSearchParams();
+		params.append("guids", lightSensorGuids)
+		if (this.state.roomLightSensors.length > 0) {
+			axios.get("http://localhost:8083/light/list", { params: params })
+				.then(({ data }) => {
+					this.setState({
+						chosenLightSensors: data
+					})
+					console.log(this.state.chosenLightSensors)
+			})
+		}
+		await axios.get("http://localhost:8083/light/available-to-attach")
 			.then(({ data }) => {
 				this.setState({
 					lightSensors: data,
 				})
-				this.setState({chosenLightSensors: this.findChosenLightSensors(this.state.roomLightSensors, this.state.lightSensors)});
-				console.log(this.state.chosenLightSensors)
 			});
 	}
 
@@ -123,8 +143,15 @@ export default class EditRoom extends Component {
 	}
 
 	async removeAllSensorsFromRoom() {
-		let sensorGuids = this.state.chosenLightSensors.map(sensor => sensor.guid)
-		await axios.put("http://localhost:8081/room/remove-sensors", sensorGuids)
+		let lightSensors = this.state.chosenLightSensors.map(function(sensor) {
+			return {
+				guid: sensor.guid,
+				type: "LIGHT"
+			}
+		})
+		console.log(lightSensors)
+		debugger
+		await axios.put("http://localhost:8081/room/remove-sensors", lightSensors)
 				.then(response => {
 					if (response.data != null) {
 						this.setState({
@@ -171,6 +198,7 @@ export default class EditRoom extends Component {
 		let roomInfo = {
 			sensors: chosenSensors
 		}
+
 		await axios.put("http://localhost:8081/room/" + this.props.match.params.guid, roomInfo)
 				.then(response => {
 					if (response.data != null) {
@@ -187,6 +215,8 @@ export default class EditRoom extends Component {
 
 	async temperatureSensorChangeHandler() {
 		console.log(this.state.temperatureGuid)
+		console.log(this.state.chosenTemperature)
+		console.log(this.state.chosenTemperature.guid == undefined)
 		let sensorGuids = [this.state.chosenTemperature.guid]
 
 		let chosenSensors = {
@@ -198,15 +228,22 @@ export default class EditRoom extends Component {
 		let roomInfo = {
 			sensors: [chosenSensors]
 		}
-
-		axios.all([
-		    axios.put("http://localhost:8081/room/remove-sensors", sensorGuids),
+		if (sensorGuids.length > 0 && this.state.chosenTemperature.guid != undefined) {
+			axios.all([
+			    axios.put("http://localhost:8081/room/remove-sensors", sensorGuids),
+			    axios.put("http://localhost:8081/room/" + this.props.match.params.guid, roomInfo)
+		    ])
+		    .then(axios.spread((removeResponse, updateResponse) => {
+		    	console.log(removeResponse)
+		    	console.log(updateResponse)
+		    }))
+		} else {
 		    axios.put("http://localhost:8081/room/" + this.props.match.params.guid, roomInfo)
-	    ])
-	    .then(axios.spread((removeResponse, updateResponse) => {
-	    	console.log(removeResponse)
-	    	console.log(updateResponse)
-	    }))
+			    .then((removeResponse) => {
+			    	console.log(removeResponse)
+			    })
+		}
+		
 	}
 
 	addNewTemperatureSensor() {
@@ -238,41 +275,6 @@ export default class EditRoom extends Component {
 	  	})
     	
     	return chosenLightSensors;
-	}
-
-	submitForm = event => {
-		let temperatureSensor = {
-			guid: this.state.temperatureGuid,
-			type: "TEMPERATURE"
-		}
-		let chosenSensors = this.state.lightSensorGuids.map(function (lightGuid) {
-			return {
-				guid: lightGuid,
-				type: "LIGHT"
-			}
-		})
-
-		chosenSensors.push(temperatureSensor)
-		console.log(chosenSensors)
-		const room = {
-			name: this.state.name,
-			sensors: chosenSensors
-		}
-
-		axios.post("http://localhost:8081/room", room)
-		.then(response => {
-			console.log(response);
-			if (response.data != null) {
-				this.setState({"show": true})
-				setTimeout(() => this.setState({"show": false}), 3000)
-			} else {
-				this.setState({"show": false})
-			}
-		});
-
-		this.setState(this.initialState)
-		this.getTemperatureSensors()
-		this.getLightSensors()
 	}
 
 	nameChange = (event) => {
@@ -319,6 +321,7 @@ export default class EditRoom extends Component {
 			temperatureGuid, 
 			chosenTemperature,
 			abilityForAddingTemperatureSensors,
+			temperatureLoader,
 			lightGuid, 
 			lightSensors, 
 			lightSensorGuids,
@@ -380,7 +383,7 @@ export default class EditRoom extends Component {
 							    <Form.Group as={ Row } controlId="formGridState">
 							        <Form.Label column sm = "3">Temperature sensor: </Form.Label>
 							        <Col sm = "3">
-							        	<a href="#">{chosenTemperature.name}</a>
+							        	<a href="#">{temperatureLoader === true ? chosenTemperature.name : ""}</a>
 							        </Col>
 							        <Col sm = "6">
 							        	<Button size = "sm" variant = "secondary" type = "button" onClick = {this.addAbilityForAddingTemperatureSensors.bind(this, true)}>

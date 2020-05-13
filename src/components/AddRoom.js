@@ -41,12 +41,6 @@ export default class AddRoom extends Component {
 				this.setState({
 					temperatureSensors: data,
 				})
-
-				if (data[0] !== null) {
-					this.setState({
-						temperatureGuid: data[0].guid
-					})
-				}
 			});
 	}
 
@@ -60,18 +54,20 @@ export default class AddRoom extends Component {
 	}
 
 	submitForm = event => {
-		let temperatureSensor = {
-			guid: this.state.temperatureGuid,
-			type: "TEMPERATURE"
-		}
 		let chosenSensors = this.state.lightSensorGuids.map(function (lightGuid) {
 			return {
 				guid: lightGuid,
 				type: "LIGHT"
 			}
 		})
-
-		chosenSensors.push(temperatureSensor)
+		if (this.state.temperatureGuid !== '') {
+			let temperatureSensor = {
+				guid: this.state.temperatureGuid,
+				type: "TEMPERATURE"
+			}
+			chosenSensors.push(temperatureSensor)
+		}
+		
 		console.log(chosenSensors)
 		const room = {
 			name: this.state.name,
@@ -101,10 +97,16 @@ export default class AddRoom extends Component {
 	}
 
 	temperatureSelectChange = (event) => {
-		console.log("TEMPERATURE EVENT")
-		this.setState({
-			temperatureGuid: event.target.value
-		});
+		if (event.target.value !== "Choose necessary temperature sensor...") {
+			this.setState({
+				temperatureGuid: event.target.value
+			});
+		} else {
+			this.setState({
+				temperatureGuid: ''
+			});
+		}
+		
 	}
 
 	lightSelectChange = (event) => {
@@ -133,54 +135,53 @@ export default class AddRoom extends Component {
 					</Card.Header>
 					<Form onSubmit={this.submitForm} id="room-form">
 						<Card.Body>
-						 	<Form.Row>
-						 		<Form.Group as={ Col } controlId="formControlName">
-								    <Form.Label>Room Name</Form.Label>
-								    <Form.Control required autoComplete="off"
-								    	type="text" name="name"
-								    	value={name}
-								    	onChange={(e) => this.nameChange(e)}
-								    	className={"bg-light text-black"}
-								    	placeholder="Enter Room Name" />
-							  	</Form.Group>
+					 		<Form.Group as={ Col } controlId="formControlName">
+							    <Form.Label>Room Name</Form.Label>
+							    <Form.Control required autoComplete="off"
+							    	type="text" name="name"
+							    	value={name}
+							    	onChange={(e) => this.nameChange(e)}
+							    	className={"bg-light text-black"}
+							    	placeholder="Enter Room Name" />
+						  	</Form.Group>
 
-							  	<Form.Group as={Col} controlId="formGridState">
-							      <Form.Label>Temperature sensor</Form.Label>
+						  	<Form.Group as={Col} controlId="formGridState">
+						      <Form.Label>Temperature sensor</Form.Label>
 
-							      <Form.Control 
-							      	as="select" 
-							      	custom={temperatureGuid}
-							      	onChange={(e) => this.temperatureSelectChange(e)}
-							      	value={temperatureGuid}>
-							      	{ temperatureSensors.map((tempeatureSensor) => {
-							      		return(
-							      			<option key={tempeatureSensor.guid} value={tempeatureSensor.guid}>
-							      				{tempeatureSensor.name}
-							      			</option>
-							      		)
-							      	})}
-							      </Form.Control>
-							    </Form.Group>
+						      <Form.Control 
+						      	as="select" 
+						      	custom={temperatureGuid}
+						      	onChange={(e) => this.temperatureSelectChange(e)}
+						      	value={temperatureGuid}>
+						      	<option>Choose necessary temperature sensor...</option>
+						      	{ temperatureSensors.map((tempeatureSensor) => {
+						      		return(
+						      			<option key={tempeatureSensor.guid} value={tempeatureSensor.guid}>
+						      				{tempeatureSensor.name}
+						      			</option>
+						      		)
+						      	})}
+						      </Form.Control>
+						    </Form.Group>
 
-								<Form.Group as={Col} controlId="formGridState">
-							        <Form.Label>Light sensor</Form.Label>
+							<Form.Group as={Col} controlId="formGridState">
+						        <Form.Label>Light sensor</Form.Label>
 
-							        <Form.Control 
-							      	  as="select" 
-							      	  multiple
-							      	  custom={lightSensorGuids}
-							      	  onChange={(e) => this.lightSelectChange(e)}
-							      	  value={lightSensorGuids}>
-							      	  { lightSensors.map((lightSensor) => {
-							      		return(
-							      		 	<option key={lightSensor.guid} value={lightSensor.guid}>
-							      				{lightSensor.name}
-							      			</option>
-							      		)
-							      	  })}
-							        </Form.Control>
-							    </Form.Group>
-						 	</Form.Row>
+						        <Form.Control 
+						      	  as="select" 
+						      	  multiple
+						      	  custom={lightSensorGuids}
+						      	  onChange={(e) => this.lightSelectChange(e)}
+						      	  value={lightSensorGuids}>
+						      	  { lightSensors.map((lightSensor) => {
+						      		return(
+						      		 	<option key={lightSensor.guid} value={lightSensor.guid}>
+						      				{lightSensor.name}
+						      			</option>
+						      		)
+						      	  })}
+						        </Form.Control>
+						    </Form.Group>
 						</Card.Body>
 
 						<Card.Footer>

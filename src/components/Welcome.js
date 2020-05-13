@@ -14,12 +14,12 @@ export default class Welcome extends Component {
 			    you can create a room or enter sensor information into the system.
 			  </p>
 			  <div className="add-btn">
-			    <Button variant="primary">
-			    	<Link to={"add-room"} className="nav-link">Add New Room</Link>
-			    </Button>
-			    <Button variant="primary">
-		      	<Link to={"add-sensor"} className="nav-link">Add New Sensor</Link>
-		      </Button>
+			    <Link to={"list-room"} className="btn btn-sm btn-outline-primary">
+			    	Room list
+			    </Link>
+		      <Link to={"sensors"} className="btn btn-sm btn-outline-primary">
+		      	Sensors list
+		      </Link>
 		     </div>
 			</Jumbotron>	
 		)

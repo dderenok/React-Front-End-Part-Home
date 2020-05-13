@@ -34,13 +34,11 @@ export default class EditTemperature extends Component {
 	
 	componentDidMount() {
 		this.getTemperatureInfo()
-		console.log("1")
 	}
 
 	getTemperatureInfo() {
 		axios.get("http://localhost:8082/temperature/" + this.props.match.params.guid)
 			.then(response => {
-				console.log(response)
 				if (response.data != null) {
 					this.setState({
 						name: response.data.name,
@@ -53,19 +51,14 @@ export default class EditTemperature extends Component {
 						alreadyAttached: true
 					})
 				}
-				console.log(this.state.name)
-				console.log(this.state.roomGuid)
 				this.getRoomsInfo()
-				console.log("3")
 			}).catch((error) => console.log(error))
 	}
 
 	getRoomsInfo() {
-		console.log("2")
 		if (this.state.roomGuid === null) {
-			axios.get("http://localhost:8081/room/available-rooms")
+			axios.get("http://localhost:8081/room/available-rooms/temperature")
 				.then(({data}) => {
-					console.log(data)
 					this.setState({
 						availableRoom: data
 					})
@@ -212,10 +205,9 @@ export default class EditTemperature extends Component {
 					<OperationNotification show = { this.state.show } message = { this.state.showMessage } type = { "success" }/>
 				</div>
 				<Card>
-					<Card.Header><FontAwesomeIcon icon={ faInfoCircle } /> Temperature sensor information</Card.Header>
+					<Card.Header>Temperature sensor information</Card.Header>
 					<Form noValidate id="room-form">
 						<Card.Body>
-						 	<Form.Row>
 						 		<Form.Group as={ Col } controlId="formControlName">
 							    <Form.Label>Name of Temperature sensor</Form.Label>
 							    <Form.Control required autoComplete="off"
@@ -278,7 +270,6 @@ export default class EditTemperature extends Component {
 							    :
 							    <p>This sensor already attached to room.</p>
 							}
-						 	</Form.Row>
 						</Card.Body>
 
 						<Card.Footer>
