@@ -93,7 +93,7 @@ export default class EditRoom extends Component {
 					temperatureSensors: data,
 				})
 
-				if (data[0] !== null) {
+				if (data[0] !== undefined && data[0] !== null) {
 					this.setState({
 						temperatureGuid: data[0].guid
 					})
@@ -337,7 +337,6 @@ export default class EditRoom extends Component {
 
 				<Card>
 					<Card.Header>
-						<FontAwesomeIcon icon={ faInfoCircle } /> 
 							Room information 
 					</Card.Header>
 					<Form onSubmit={this.submitForm} id="room-form">
@@ -356,7 +355,7 @@ export default class EditRoom extends Component {
 						  	</Form.Group>
 
 						  	{ abilityForAddingTemperatureSensors === true ? 
-		    					<Form.Group as={Col} controlId="formGridState">
+		    					<Form.Group as={Row} controlId="formGridState">
 								    <Form.Label>Temperature sensor</Form.Label>
 
 								    <Form.Control 
@@ -380,75 +379,94 @@ export default class EditRoom extends Component {
 						        	</Button>
 							    </Form.Group>
 							    :
-							    <Form.Group as={ Row } controlId="formGridState">
-							        <Form.Label column sm = "3">Temperature sensor: </Form.Label>
-							        <Col sm = "3">
-							        	<a href="#">{temperatureLoader === true ? chosenTemperature.name : ""}</a>
-							        </Col>
-							        <Col sm = "6">
-							        	<Button size = "sm" variant = "secondary" type = "button" onClick = {this.addAbilityForAddingTemperatureSensors.bind(this, true)}>
-							        		Choose another
-							        	</Button>
-							        </Col>
+							    <Form.Group as={Row} controlId="formGridState" className="edit-group-btn">
+							        {chosenTemperature.name !== "" ?
+
+								        	<Col>
+								        		<Form.Label className="edit-btn">Temperature sensor: </Form.Label>
+									        	<a href="#" className="edit-btn">{temperatureLoader === true ? chosenTemperature.name : ""}</a>
+									        	<button className="btn-sm btn-secondary edit-btn" type = "button" onClick = {this.addAbilityForAddingTemperatureSensors.bind(this, true)}>
+									        		Choose another
+									        	</button>
+							        		</Col>
+
+							        	:
+							        	<Col sm = "9">
+								        	<button className="btn-sm btn-primary" type = "button" onClick = {this.addAbilityForAddingTemperatureSensors.bind(this, true)}>
+								        		Choose available
+								        	</button>
+							        	</Col>
+							    	}
+							        
 						    	</Form.Group>
 						    }
 
 							<Form.Group as={ Row } controlId="formGridState">
 						        <Form.Label column sm = "3">Light sensors:</Form.Label>
-						        <Col sm = "5">
+						        <Col sm="5">
 							        <ListGroup>
-								        { chosenLightSensors.map((lightSensor) => {
-								        	return (
-								        		<ListGroup.Item key = {lightSensor.guid} className = "light-list-element">
-								        		 	<a href = "#">{lightSensor.name}</a>
-								        		 	<Button size = "sm" variant = "danger" type = "button" onClick = {this.removeSensorFromRoom.bind(this, lightSensor.guid)}>
-								        		 		Remove from room
-								        		 	</Button>
-								        		</ListGroup.Item>
-							        		)
-										})}
+							        	{ chosenLightSensors !== [] ?
+							        		<div>
+							        		{ chosenLightSensors.map((lightSensor) => {
+									        	return (
+									        		<ListGroup.Item key = {lightSensor.guid} className = "light-list-element">
+									        		 	<a href = "#">{lightSensor.name}</a>
+									        		 	<button className="btn btn-sm btn-danger" type = "button" onClick = {this.removeSensorFromRoom.bind(this, lightSensor.guid)}>
+									        		 		Remove
+									        		 	</button>
+									        		</ListGroup.Item>
+								        		)
+											})}
+											</div>
+											:
+											<div></div>
+							        	}
+								        
 									</ListGroup>
 								</Col>
-								<Col sm = "4" className = "light-operation-group-btn">
+								<Col className = "light-operation-group-btn">
 									{ chosenLightSensors.length !== 0 ? 
-										abilityForAddingLightSensors === true ? 
+										
 											<Form.Group as={Col} controlId="formGridState">
-										        <Form.Label>Light sensor</Form.Label>
+											{ abilityForAddingLightSensors === true ? 
+										        <div>
+											        <Form.Label>Light sensor</Form.Label>
 
-										        <Form.Control 
-										      	  as="select" 
-										      	  multiple
-										      	  custom={lightSensorGuids}
-										      	  onChange={(e) => this.lightSelectChange(e)}
-										      	  value={lightSensorGuids}>
-										      	  { lightSensors.map((lightSensor) => {
-										      		return(
-										      		 	<option key={lightSensor.guid} value={lightSensor.guid}>
-										      				{lightSensor.name}
-										      			</option>
-										      		)
-										      	  })}
-								        		</Form.Control>
-								        		<Button size = "sm" variant = "primary" type = "button" onClick = { this.addNewLightSensors.bind(this) }>
-								        			Add selected
-								        		</Button>
-								        		<Button size = "sm" variant = "secondary" type = "button" onClick = { this.addAbilityForAddingLightSensors.bind(this, false) }>
-								        			Cancel
-								        		</Button>
+											        <Form.Control 
+											      	  as="select" 
+											      	  multiple
+											      	  custom={lightSensorGuids}
+											      	  onChange={(e) => this.lightSelectChange(e)}
+											      	  value={lightSensorGuids}>
+											      	  { lightSensors.map((lightSensor) => {
+											      		return(
+											      		 	<option key={lightSensor.guid} value={lightSensor.guid}>
+											      				{lightSensor.name}
+											      			</option>
+											      		)
+											      	  })}
+									        		</Form.Control>
+									        		<Button size = "sm" variant = "primary" type = "button" onClick = { this.addNewLightSensors.bind(this) }>
+									        			Add selected
+									        		</Button>
+									        		<Button size = "sm" variant = "secondary" type = "button" onClick = { this.addAbilityForAddingLightSensors.bind(this, false) }>
+									        			Cancel
+									        		</Button>
+									        	</div>
+								        		:
+												<div className="btn-light-edit">	
+													<button className="btn-sm btn-primary" type = "button" onClick = { this.addAbilityForAddingLightSensors.bind(this, true) }>
+														Add light sensors
+													</button> 
+												</div>
+											}
 								    		</Form.Group> 
-							    			:
-											<div>	
-												<Button size = "sm" variant = "danger" type = "button" onClick = {this.removeAllSensorsFromRoom.bind(this)}>
-													Remove all
-												</Button>
-												<Button size = "sm" variant = "primary" type = "button" onClick = { this.addAbilityForAddingLightSensors.bind(this, true) }>
-													Add available light sensors
-												</Button> 
-										</div>
+							    			
 									: 
 									<div>
+										<Form.Group as={Row} controlId="formGridState">
 										{ abilityForAddingLightSensors === true ? 
-											<Form.Group as={Col} controlId="formGridState">
+									        <div>
 										        <Form.Label>Light sensor</Form.Label>
 
 										        <Form.Control 
@@ -471,12 +489,13 @@ export default class EditRoom extends Component {
 								        		<Button size = "sm" variant = "secondary" type = "button" onClick = { this.addAbilityForAddingLightSensors.bind(this, false) }>
 								        			Cancel
 								        		</Button>
-								    		</Form.Group> 
-							    			:
-								    		<Button size = "sm" variant = "primary" type = "button" onClick = { this.addAbilityForAddingLightSensors.bind(this, true) }>
+								        	</div>
+							        		:
+								    		<button className="btn-sm btn-primary " sm="12" type = "button" onClick = { this.addAbilityForAddingLightSensors.bind(this, true) }>
 												Add available light sensors
-											</Button>
+											</button>
 										}
+							    		</Form.Group> 
 									</div>
 									}
 								</Col>
@@ -484,9 +503,9 @@ export default class EditRoom extends Component {
 						</Card.Body>
 
 						<Card.Footer>
-							<Button size="sm" variant="info" type="button" onClick = {this.roomList.bind()} >
+							<button className="btn-sm btn-outline-primary room-list-btn" type="button" onClick = {this.roomList.bind()} >
 						    	<FontAwesomeIcon icon={ faList } /> Room list
-						  	</Button>
+						  	</button>
 						</Card.Footer>
 					</Form> 
 				</Card>

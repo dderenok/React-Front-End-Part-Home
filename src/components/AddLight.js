@@ -7,6 +7,8 @@ import OperationNotification from './OperationNotification.js';
 
 import axios from 'axios';
 
+import '../styles/add-light.scss';
+
 export default class AddLight extends Component {
 
 	constructor (props) {
@@ -34,7 +36,7 @@ export default class AddLight extends Component {
 			})
 	}
 
-	async submitForm(event) {
+	submitForm = (event) => {
 		let lightSensor = {
 			name: this.state.name,
 			roomGuid: this.state.roomGuid
@@ -42,7 +44,7 @@ export default class AddLight extends Component {
 
 		console.log(lightSensor)
 
-		await axios.post("http://localhost:8083/light", lightSensor)
+		axios.post("http://localhost:8083/light", lightSensor)
 			.then(response => {
 				console.log(response);
 				if (response.data != null) {
@@ -94,7 +96,7 @@ export default class AddLight extends Component {
 						<Card.Body>
 					 		<Form.Group as={ Col } controlId="formControlName">
 						    <Form.Label>Name of Light sensor</Form.Label>
-						    <Form.Control required
+						    <Form.Control required autocomplete="off"
 						    	type="text" name="name"
 						    	value={this.state.name}
 						    	onChange={this.nameChange}
@@ -123,12 +125,12 @@ export default class AddLight extends Component {
 						</Card.Body>
 
 						<Card.Footer>
-							<Button size="sm" variant="info" type="button" onClick = {this.backToSensorList.bind()} >
+							<button className="btn-sm btn-outline-primary add-light-btn" onClick = {this.backToSensorList.bind()} >
 						    	<FontAwesomeIcon icon={ faList } /> Back to sensor list
-						  	</Button>
-							<Button size="sm" variant="success" type="button" onClick = {this.submitForm}>
+						  	</button>
+							<button className="btn-sm btn-primary" type="button" onClick = {this.submitForm}>
 						    	Create
-						  	</Button>
+						  	</button>
 						</Card.Footer>
 					</Form> 
 				</Card>

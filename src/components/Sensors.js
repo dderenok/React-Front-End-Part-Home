@@ -90,13 +90,13 @@ export default class Sensors extends Component {
 					this.setState({
 						lightSensors: data,
 						lightData: data.map((sensor, index) => {
-									return {
-										id: index,
-										name: sensor.name,
-										status: sensor.status.toString(),
-										guid: sensor.guid
-									}
-								}),
+							return {
+								id: index,
+								name: sensor.name,
+								status: sensor.status.toString(),
+								guid: sensor.guid
+							}
+						}).reverse(),
 						isLoadedLight: false
 					})
 
@@ -107,14 +107,14 @@ export default class Sensors extends Component {
 					this.setState({
 						temperatureSensors: data,
 						temperatureData: data.map((sensor, index) => {
-									return {
-										id: index,
-										name: sensor.name,
-										status: sensor.status.toString(),
-										temperatureValue: sensor.temperatureValue,
-										guid: sensor.guid
-									}
-								}),
+							return {
+								id: index,
+								name: sensor.name,
+								status: sensor.status.toString(),
+								temperatureValue: sensor.temperatureValue,
+								guid: sensor.guid
+							}
+						}).reverse(),
 						isLoadedTemperature: false
 					})
 				});
@@ -164,13 +164,13 @@ export default class Sensors extends Component {
 				<div style = {{ "display": this.state.show ? "block" : "none" }}>
 					<OperationNotification show = { this.state.show } message = { this.state.showMessage } type = { "danger" }/>
 				</div>
-				<div className="table-info">
+				<div className="table-info sensor-list-container">
 					<Tabs defaultActiveKey="1">
 					    <TabPane tab="Temperature sensors" key="1">
 							<DataTable
-								noHeader = {true}
+								title="List of temperature sensors"
 							    actions = {
-							    	<Link to = { "add-temperature" } className="btn btn-sm btn-outline-primary">
+							    	<Link to = { "add-temperature" } className="btn btn-sm btn-outline-primary add-button">
 			    						Add new
 			    					</Link>
 							    }
@@ -182,9 +182,9 @@ export default class Sensors extends Component {
 					    </TabPane>
 					    <TabPane tab="Light sensors" key="2">
 					    	<DataTable
-					    		noHeader = {true}
+					    		title = "List of light sensors"
 							    actions = {
-							    	<Link to = { "add-light" } className="btn btn-sm btn-outline-primary">
+							    	<Link to = { "add-light" } className="btn btn-sm btn-outline-primary add-button">
 			    						Add new
 			    					</Link>
 							    }

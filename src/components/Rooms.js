@@ -197,7 +197,7 @@ export default class Rooms extends Component {
 					<Row>
 						<Col >
 							<DataTable
-							    title="Room name"
+							    title="Room list"
 							    actions = {
 							    	<Link to = { "add-room" } className="btn btn-sm btn-outline-primary">
 			    						Add new room
@@ -208,7 +208,6 @@ export default class Rooms extends Component {
 							    progressPending = {this.state.isLoadedRoomInfo}
 							    pagination = {true}
 							    overflowY = {true}
-							    selectableRows = {true}
 							 />
 						</Col>
 					</Row>

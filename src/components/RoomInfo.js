@@ -32,6 +32,7 @@ export default class RoomInfo extends Component {
 	      {
 	        name: 'Name',
 	        selector: 'name',
+	        width: '25%'
 	      },
 	      {
 	        name: 'Status',
@@ -46,26 +47,32 @@ export default class RoomInfo extends Component {
 	        			<img src={false_status} alt="Status" className="status-icon"/>
 	        		}
 	        		
-	        	</div>
+	        	</div>,
+	        width: '25%'
 	      },
 
 	      {
 	        name: 'TemperatureValue',
-	        selector: 'temperatureValue'
+	        selector: 'temperatureValue',
+	        width: '25%'
 	      },
 	      {
-	      	name: 'Turn On/Off',
+	      	name: 'Actions',
 	      	selector: 'turnOnOff',
 	      	cell: (row) =>
 	      		<div>
 		      		<button className = {classNames({'btn-sm': true}, {'btn-outline-success': row.status != 'true'}, {'btn-success': row.status == 'true'})} onClick={(event) => this.updateTemperatureStatus(row, event)}>
 		      			{row.status == 'true' ? "Turn Off" : "Turn On"}
 		      		</button>
+		      		<button className = "btn-sm btn-danger" onClick={(event) => this.removeTemperatureSensorFromRoom(row, event)}>
+		      			Remove from room
+		      		</button>
 		      	</div>
 	      	,
 	      	ignoreRowClick: true,
     		allowOverflow: true,
     		button: true,
+    		width: '25%'
 	      }
 	    ],
 	    lightColumns: [
@@ -73,6 +80,7 @@ export default class RoomInfo extends Component {
 	        name: 'Name',
 	        selector: 'name',
 	        sortable: 'asc',
+	        width: '35%'
 	      },
 	      {
 	        name: 'Status',
@@ -87,7 +95,8 @@ export default class RoomInfo extends Component {
 	        			<img src={false_status} alt="Status" className="status-icon"/>
 	        		}
 	        		
-	        	</div>
+	        	</div>,
+	        width: '30%'
 	      },
 	      {
 	      	cell: (row) =>
@@ -95,12 +104,16 @@ export default class RoomInfo extends Component {
 	      			<button className = {classNames({'btn-sm': true}, {'btn-outline-success': row.status != 'true'}, {'btn-success': row.status == 'true'})} onClick={(event) => this.updateLightStatus(row, event)}>
 		      			{row.status == 'true' ? "Turn Off" : "Turn On"}
 		      		</button>
+		      		<button className = "btn-sm btn-danger" onClick={(event) => this.removeLightSensorFromRoom(row, event)}>
+		      			Remove from room
+		      		</button>
 		      	</div>
 	      	,
     		ignoreRowClick: true,
     		allowOverflow: true,
     		button: true,
-    		name: 'Turn On/Off'
+    		name: 'Turn On/Off',
+    		width: '40%'
 	      }
 	    ]
 	}
@@ -180,7 +193,7 @@ export default class RoomInfo extends Component {
 				console.log(data)
 				this.setState({
 					"show": true,
-					"showMessage": "Temperature sensor ".concat(sensor.name, " was ", sensor.status == 'true' ? "diactivated" : "activated", " succesfully."),
+					"showMessage": "Sensor ".concat(sensor.name, " was ", sensor.status == 'true' ? "diactivated" : "activated", " succesfully."),
 					"typeMessage": sensor.status == 'true' ? "danger" : "success"
 				})
 				setTimeout(() => this.setState({"show": false}), 30000)
@@ -207,7 +220,7 @@ export default class RoomInfo extends Component {
 				console.log(data)
 				this.setState({
 					"show": true,
-					"showMessage": "Light sensor ".concat(sensor.name, " was ", sensor.status == 'true' ? "diactivated" : "activated", " succesfully."),
+					"showMessage": "Sensor ".concat(sensor.name, " was ", sensor.status == 'true' ? "diactivated" : "activated", " succesfully."),
 					"typeMessage": sensor.status == 'true' ? "danger" : "success"
 				})
 				setTimeout(() => this.setState({"show": false}), 300000)
@@ -225,6 +238,47 @@ export default class RoomInfo extends Component {
 				})
 				})
 				console.log(this.state.lightSensors)
+			})
+	}
+
+	removeLightSensorFromRoom = (sensor, event) => {
+		let sensors = [{
+			guid: sensor.guid,
+			type: "LIGHT",
+			roomGuid: sensor.roomGuid
+		}]
+		axios.put("http://localhost:8081/room/remove-sensors", sensors)
+			.then(({data}) => {
+				this.setState({
+					"show": true,
+					"showMessage": "Sensor was remove from room.",
+					"typeMessage": "success"
+				})
+				setTimeout(() => this.setState({"show": false}), 30000)
+				this.setState({
+					lightSensors: this.state.lightSensors.filter(sensorLight => sensorLight.guid !== sensor.guid)
+				})
+			})
+	}
+
+	removeTemperatureSensorFromRoom = (sensor, event) => {
+		let sensors = [{
+			guid: sensor.guid,
+			type: "TEMPERATURE",
+			roomGuid: sensor.roomGuid
+		}]
+		
+		axios.put("http://localhost:8081/room/remove-sensors", sensors)
+			.then(({data}) => {
+				this.setState({
+					"show": true,
+					"showMessage": "Sensor was remove from room.",
+					"typeMessage": "success"
+				})
+				setTimeout(() => this.setState({"show": false}), 30000)
+				this.setState({
+					temperatureSensors: this.state.temperatureSensors.filter(sensorTemperature => sensorTemperature.guid !== sensor.guid)
+				})
 			})
 	}
 

@@ -8,6 +8,8 @@ import OperationNotification from './OperationNotification.js';
 
 import axios from 'axios';
 
+import '../styles/add-room.scss';
+
 export default class AddRoom extends Component {
 
 	constructor (props) {
@@ -38,6 +40,7 @@ export default class AddRoom extends Component {
 	getTemperatureSensors = async => {
 		axios.get("http://localhost:8082/temperature/attach-available")
 			.then(({ data }) => {
+				
 				this.setState({
 					temperatureSensors: data,
 				})
@@ -45,7 +48,7 @@ export default class AddRoom extends Component {
 	}
 
 	getLightSensors = async => {
-		axios.get("http://localhost:8083/light")
+		axios.get("http://localhost:8083/light/available-to-attach")
 			.then(({ data }) => {
 				this.setState({
 					lightSensors: data,
@@ -73,7 +76,6 @@ export default class AddRoom extends Component {
 			name: this.state.name,
 			sensors: chosenSensors
 		}
-
 		axios.post("http://localhost:8081/room", room)
 		.then(response => {
 			console.log(response);
@@ -130,8 +132,7 @@ export default class AddRoom extends Component {
 
 				<Card>
 					<Card.Header>
-						<FontAwesomeIcon icon={ faPlusSquare } /> 
-							Add Room
+							Add new room
 					</Card.Header>
 					<Form onSubmit={this.submitForm} id="room-form">
 						<Card.Body>
@@ -185,11 +186,11 @@ export default class AddRoom extends Component {
 						</Card.Body>
 
 						<Card.Footer>
-							<Button size="sm" variant="info" type="button" onClick = {this.roomList.bind()} >
+							<Button size="sm" variant="btn-sm btn-outline-primary room-list-btn" type="button" onClick = {this.roomList.bind()} >
 						    	<FontAwesomeIcon icon={ faList } /> Room list
 						  	</Button>
 							<Button size="sm" variant="success" type="button" onClick = {this.submitForm}>
-						    	Submit
+						    	Create
 						  	</Button>
 						</Card.Footer>
 					</Form> 

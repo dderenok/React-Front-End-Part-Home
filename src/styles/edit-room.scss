@@ -2,10 +2,23 @@
 	position: relative;
 }
 
-.light-list-element > Button {
-	float: right;
-}
-
 .light-operation-group-btn > div > Button {
 	margin-top: 15px;
+}
+
+.edit-btn {
+	margin-right: 5%;
+}
+
+.card {
+	width: 500px !important;
+}
+
+.btn-light-edit {
+	flex-direction: row
+}
+
+.room-list-btn {
+	float: left;
+	margin-bottom: 2%;
 }

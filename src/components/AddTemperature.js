@@ -18,7 +18,7 @@ export default class AddTemperature extends Component {
 		this.nameChange = this.nameChange.bind(this);
 		this.temperatureValueChange = this.temperatureValueChange.bind(this);
 		this.roomSelectChange = this.roomSelectChange.bind(this);
-		this.submitForm = this.submitForm.bind(this);
+		this.createTemperature = this.createTemperature.bind(this);
 	}
 
 	initialState = {
@@ -42,7 +42,7 @@ export default class AddTemperature extends Component {
 			})
 	}
 
-	submitForm(event) {
+	createTemperature = (event) => {
 		let temperatureSensor = {
 			name: this.state.name,
 			temperatureValue: this.state.temperatureValue,
@@ -50,8 +50,6 @@ export default class AddTemperature extends Component {
 		}
 
 		console.log(temperatureSensor)
-		debugger
-
 		axios.post("http://localhost:8082/temperature", temperatureSensor)
 			.then(response => {
 				console.log(response);
@@ -61,8 +59,9 @@ export default class AddTemperature extends Component {
 				} else {
 					this.setState({"show": false})
 				}
+				console.log(this.state.show)
+				setTimeout(() => console.log("success"), 3000)
 			});
-
 		this.setState(this.initialState)
 	}
 
@@ -146,7 +145,7 @@ export default class AddTemperature extends Component {
 						<Card.Body>
 						 		<Form.Group as={ Col } controlId="formControlName">
 							    <Form.Label>Name of Temperature sensor</Form.Label>
-							    <Form.Control required
+							    <Form.Control autocomplete="off"
 							    	type="text" name="name"
 							    	value={this.state.name}
 							    	onChange={this.nameChange}
@@ -162,7 +161,7 @@ export default class AddTemperature extends Component {
 
 							  <Form.Group as={ Col } controlId="formControlTemperature">
 							    <Form.Label>Default Temperature</Form.Label>
-							    <Form.Control required
+							    <Form.Control autocomplete="off"
 							    	type="number" name="temperature"
 							    	value={this.state.temperatureValue}
 							    	onChange={this.temperatureValueChange}
@@ -202,10 +201,10 @@ export default class AddTemperature extends Component {
 							    </Form.Group>
 						</Card.Body>
 						<Card.Footer>
-							<Button size="sm" variant="info" type="button" onClick = {this.backToSensorList.bind()} >
+							<button className="btn-sm btn-outline-primary add-temperature-btn" onClick = {this.backToSensorList.bind()} >
 						    	<FontAwesomeIcon icon={ faList } /> Back to sensor list
-						  	</Button>
-					  		<button className = "btn-sm btn-primary" onClick = {this.submitForm}>
+						  	</button>
+					  		<button className = "btn-sm btn-primary" type="button" onClick = {this.createTemperature}>
 						    	Create
 						  	</button>
 						</Card.Footer>
